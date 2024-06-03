@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { YOUTUBE_VIDEO_API } from '../utils/constants';
 import VideoCard from './VideoCard';
 import { Link } from 'react-router-dom';
+import ClipLoader from 'react-spinners/ClipLoader';
 
 
 const VideoContainer = () => {
@@ -51,7 +52,11 @@ const VideoContainer = () => {
           <VideoCard info={video} />
         </Link>
       ))}
-      {loading && <div>Loading...</div>}
+      {loading && (
+                <div className="flex justify-center items-center w-full">
+                    <ClipLoader color={"#123abc"} loading={loading} size={50} />
+                </div>
+            )}
     </div>
   );
 };

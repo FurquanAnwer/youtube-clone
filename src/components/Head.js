@@ -70,25 +70,13 @@ const Head = () => {
                 onChange={(e)=>setSearchQuery(e.target.value)}
                 onFocus={()=>setShowSuggestions(true)}
                 onBlur={()=>setShowSuggestions(false)}>
-                </input>
+            </input>
             <button className='border border-gray-4oo p-2 rounded-r-full'>
             
                 Search
             </button>
             </div>
-            {
-            showSuggestions && (
-                <div className='fixed bg-white py-2 px-5 w-[37rem] shadow-lg rounded-lg border border-gray-100 '>
-                <ul>
-                    {/* {suggestions.map((s)=>(
-                            <li className="py-2 shadow-sm hover:bg-gray-100">
-                            {s}
-                            </li>
-                    ))}                    */}
-                    <li>hello</li>
-                </ul>
-            </div>
-            )}
+            
                 
         </div>
         <div className='col-span-1'>
@@ -102,3 +90,8 @@ const Head = () => {
 }
 
 export default Head
+
+
+
+
+
