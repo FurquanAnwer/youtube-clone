@@ -1,66 +1,57 @@
-import React from 'react'
-import { useSelector } from 'react-redux'
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { MdHome, MdShortText, MdVideoLibrary, MdLiveTv } from 'react-icons/md';
+import { HomeIcon, FireIcon, PlayIcon, ClockIcon, ThumbUpIcon, FilmIcon, BookmarkIcon, CollectionIcon, MenuIcon } from '@heroicons/react/outline';
 
+function Sidebar() {
+  const [isOpen, setIsOpen] = useState(false);
 
-const SideBar = () => {
-    const isMenuOpen = useSelector((store)=>store.app.isMenuOpen);
-    //Early Return Pattern
-    if(!isMenuOpen) return null;
+  const menuItems = [
+    { icon: HomeIcon, text: 'Home', link: '/' },
+    { icon: FireIcon, text: 'Trending', link: '/' },
+    { icon: PlayIcon, text: 'Subscriptions', link: '/' },
+    { icon: CollectionIcon, text: 'Library', link: '/' },
+    { icon: ClockIcon, text: 'History', link: '/' },
+    { icon: ThumbUpIcon, text: 'Liked videos', link: '/' },
+    { icon: FilmIcon, text: 'Your videos', link: '/' },
+    { icon: BookmarkIcon, text: 'Watch later', link: '/' },
+  ];
+
   return (
-    <div className='p-5 shadow-lg col-span-1'>
-            <div className='flex flex-col py-1 '>
-                <Link to="/">
-                    <div className='flex items-center'>
-                        <MdHome className='h-8 w-8' />
-                        <span className='ml-2'>Home</span>
-                    </div>
-                </Link>
-            </div>
-
-            <div className='flex flex-col py-1 '>
-                <div className='flex items-center'>
-                    <MdShortText className='h-8 w-8' />
-                    <span className='ml-2'>Shorts</span>
-                </div>
-            </div>
-
-            <div className='flex flex-col py-1 '>
-                <div className='flex items-center'>
-                    <MdVideoLibrary className='h-8 w-8' />
-                    <span className='ml-2'>Videos</span>
-                </div>
-            </div>
-
-            <div className='flex flex-col py-1 '>
-                <div className='flex items-center'>
-                    <MdLiveTv className='h-8 w-8' />
-                    <span className='ml-2'>Live</span>
-                </div>
-            </div>
-
-            <div className='border-t border-gray-300'>
-                <h1 className='pt-2 font-bold'>Subscriptions</h1>
-                <ul>
-                    <li>Music</li>
-                    <li>Sports</li>
-                    <li>Gaming</li>
-                    <li>Movies</li>
-                </ul>
-            </div>
-
-            <div className='border-t border-gray-300'>
-                <h1 className='pt-2 font-bold'>Watch later</h1>
-                <ul>
-                    <li>Music</li>
-                    <li>Sports</li>
-                    <li>Gaming</li>
-                    <li>Movies</li>
-                </ul>
-            </div>
-        </div>    
-  )
+    <>
+      <button
+        className="lg:hidden fixed top-4 left-4 z-20 p-2 rounded-md bg-gray-200 hover:bg-gray-300"
+        onClick={() => setIsOpen(!isOpen)}
+      >
+        <MenuIcon className="h-6 w-6" />
+      </button>
+      <aside className={`
+        fixed inset-y-0 left-0 z-10 w-64 bg-white overflow-y-auto transition-transform duration-300 ease-in-out
+        ${isOpen ? 'translate-x-0' : '-translate-x-full'}
+        lg:translate-x-0 lg:static lg:w-25
+      `}>
+        <nav className="p-2">
+          {menuItems.map((item, index) => (
+            <Link
+              key={index}
+              to={item.link}
+              className="flex items-center p-3 text-gray-700 hover:bg-gray-100 rounded-lg"
+              onClick={() => setIsOpen(false)}
+            >
+              <item.icon className="h-6 w-6 mr-4" />
+              <span>{item.text}</span>
+            </Link>
+          ))}
+        </nav>
+      </aside>
+      {isOpen && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-50 z-0 lg:hidden"
+          onClick={() => setIsOpen(false)}
+        ></div>
+      )}
+    </>
+  );
 }
 
-export default SideBar
+export default Sidebar;
+
