@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { toggleMenu } from "../utils/appSlice";
 import { YOUTUBE_SEARCH_RESULTS_API } from "../utils/constants";
 import { cacheResults } from "../utils/searchSlice";
@@ -20,41 +20,47 @@ const Head = () => {
   const searchCache = useSelector((store) => store.search);
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const location = useLocation();
   const searchInputRef = useRef(null);
 
   useEffect(() => {
-    const timer = setTimeout(() => {
+    const fetchSuggestions = async () => {
+      if (!searchQuery.trim()) {
+        setSuggestions([]);
+        return;
+      }
+
+      // Check cache first
       if (searchCache[searchQuery]) {
         setSuggestions(searchCache[searchQuery]);
-      } else if (searchQuery.trim()) {
-        getSearchSuggestions();
+        return;
       }
-    }, 200);
 
-    return () => {
-      clearTimeout(timer);
+      try {
+        const response = await fetch(`${YOUTUBE_SEARCH_RESULTS_API}&q=${encodeURIComponent(searchQuery)}`);
+        if (!response.ok) throw new Error("Failed to fetch suggestions");
+
+        const data = await response.json();
+        if (data && data[1]) {
+          setSuggestions(data[1]);
+          dispatch(cacheResults({ [searchQuery]: data[1] }));
+        } else {
+          setSuggestions([]);
+        }
+      } catch (error) {
+        console.error("Error fetching suggestions:", error);
+        setSuggestions([]);
+      }
     };
-  }, [searchQuery]);
 
-  const getSearchSuggestions = async () => {
-    try {
-      const data = await fetch(YOUTUBE_SEARCH_RESULTS_API + searchQuery);
-      const json = await data.json();
-      setSuggestions(json[1]);
+    // Debounce API calls
+    const timer = setTimeout(fetchSuggestions, 300);
+    return () => clearTimeout(timer);
+  }, [searchQuery, dispatch, searchCache]);
 
-      dispatch(
-        cacheResults({
-          [searchQuery]: json[1],
-        })
-      );
-    } catch (error) {
-      console.error("Error fetching suggestions:", error);
-    }
-  };
-
-  const toggleMenuHandler = () => {
-    dispatch(toggleMenu());
+  const handleSuggestionClick = (suggestion) => {
+    setSearchQuery(suggestion);
+    navigate(`/results?search_query=${encodeURIComponent(suggestion)}`);
+    setShowSuggestions(false);
   };
 
   const handleSubmit = (e) => {
@@ -64,32 +70,6 @@ const Head = () => {
       setShowSuggestions(false);
     }
   };
-  
-//   const handleSubmit = (e) => {
-//     e.preventDefault();
-//     if (searchQuery.trim()) {
-//       const currentParams = new URLSearchParams(location.search);
-//       currentParams.set("search_query", searchQuery);
-//       const updatedUrl = `${location.pathname}?${currentParams.toString()}`;
-//       window.history.pushState({}, "", updatedUrl);
-//       setShowSuggestions(false);
-//     }
-//   };
-
-const handleSuggestionClick = (suggestion) => {
-    setSearchQuery(suggestion);
-    navigate(`/results?search_query=${encodeURIComponent(suggestion)}`);
-    setShowSuggestions(false);
-  };
-
-// const handleSuggestionClick = (suggestion) => {
-//     setSearchQuery(suggestion);
-//     const currentParams = new URLSearchParams(location.search);
-//     currentParams.set("search_query", suggestion);
-//     const updatedUrl = `${location.pathname}?${currentParams.toString()}`;
-//     window.history.pushState({}, "", updatedUrl);
-//     setShowSuggestions(false);
-//   };
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -99,9 +79,7 @@ const handleSuggestionClick = (suggestion) => {
     };
 
     document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   return (
@@ -111,43 +89,28 @@ const handleSuggestionClick = (suggestion) => {
         <div className="flex items-center">
           <MenuIcon
             className="h-6 cursor-pointer hover:bg-gray-100 rounded-full p-1"
-            onClick={toggleMenuHandler}
+            onClick={() => dispatch(toggleMenu())}
           />
           <Link to="/">
             <img
               className="h-6 md:h-5 mx-3"
-              alt="youtube logo"
+              alt="YouTube Logo"
               src="https://upload.wikimedia.org/wikipedia/commons/b/b8/YouTube_Logo_2017.svg"
             />
           </Link>
         </div>
 
         {/* Search Section */}
-        <div className="flex-grow max-w-2xl mx-4" ref={searchInputRef}>
+        <div className="flex-grow max-w-2xl mx-4 relative" ref={searchInputRef}>
           <form onSubmit={handleSubmit} className="flex">
-            <div className="relative flex-grow">
-              <input
-                className="w-full border border-gray-300 rounded-l-full py-2 px-4 focus:outline-none focus:border-blue-500"
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                onFocus={() => setShowSuggestions(true)}
-                placeholder="Search"
-              />
-              {showSuggestions && suggestions.length > 0 && (
-                <div className="absolute mt-1 w-full bg-white border border-gray-300 rounded-lg shadow-lg">
-                  {suggestions.map((s, i) => (
-                    <div
-                      key={i}
-                      className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                      onClick={() => handleSuggestionClick(s)}
-                    >
-                      {s}
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
+            <input
+              className="w-full border border-gray-300 rounded-l-full py-2 px-4 focus:outline-none focus:border-blue-500"
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              onFocus={() => setShowSuggestions(true)}
+              placeholder="Search"
+            />
             <button
               className="bg-gray-100 border border-l-0 border-gray-300 rounded-r-full px-4 hover:bg-gray-200"
               type="submit"
@@ -155,6 +118,19 @@ const handleSuggestionClick = (suggestion) => {
               <SearchIcon className="h-5 w-5 text-gray-500" />
             </button>
           </form>
+          {showSuggestions && suggestions.length > 0 && (
+            <div className="absolute mt-1 w-full bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+              {suggestions.map((suggestion, index) => (
+                <div
+                  key={index}
+                  className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                  onClick={() => handleSuggestionClick(suggestion)}
+                >
+                  {suggestion}
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Right Section */}

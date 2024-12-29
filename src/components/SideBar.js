@@ -29,7 +29,7 @@ function Sidebar() {
         ${isOpen ? 'translate-x-0' : '-translate-x-full'}
         lg:translate-x-0 lg:static lg:w-25
       `}>
-        <nav className="p-2">
+        <nav className="p-2 ">
           {menuItems.map((item, index) => (
             <Link
               key={index}

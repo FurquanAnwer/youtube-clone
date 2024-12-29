@@ -38,7 +38,7 @@ const LiveChat = () => {
     }
 
     return (
-        <div className="flex flex-col h-[600px] w-[400px] bg-white border border-gray-300 rounded-lg overflow-hidden">
+        <div className="flex flex-col bg-white border border-gray-300 rounded-lg overflow-hidden h-full w-full">
             <div className="bg-white border-b border-gray-300 p-4 flex justify-between items-center">
                 <h2 className="text-lg font-medium text-gray-900">Live chat</h2>
                 <button className="text-blue-600 hover:text-blue-800">

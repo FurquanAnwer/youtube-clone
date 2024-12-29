@@ -2,8 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { YOUTUBE_VIDEO_API } from '../utils/constants';
 import VideoCard from './VideoCard';
 import { Link } from 'react-router-dom';
-import ClipLoader from 'react-spinners/ClipLoader';
-
+import { Loader2 } from 'lucide-react';
 
 const VideoContainer = () => {
   const [videos, setVideos] = useState([]);
@@ -20,8 +19,8 @@ const VideoContainer = () => {
     try {
       const data = await fetch(YOUTUBE_VIDEO_API);
       const json = await data.json();
-      setVideos((prevVideos) => [...prevVideos,...json.items]);
-      setHasMore(json.items.length === 50); // assuming 10 items per page
+      setVideos((prevVideos) => [...prevVideos, ...json.items]);
+      setHasMore(json.items.length === 50);
     } catch (error) {
       console.error('Error fetching videos:', error);
     } finally {
@@ -30,10 +29,10 @@ const VideoContainer = () => {
   };
 
   const handleScroll = () => {
-    if (loading ||!hasMore) return;
+    if (loading || !hasMore) return;
     const scrollPosition = window.scrollY + window.innerHeight;
     const containerHeight = document.getElementById('video-container').offsetHeight;
-    if (scrollPosition >= containerHeight) {
+    if (scrollPosition >= containerHeight - 500) {
       getVideos();
     }
   };
@@ -46,80 +45,22 @@ const VideoContainer = () => {
   }, [loading, hasMore]);
 
   return (
-    <div id="video-container" className="flex flex-wrap justify-center">
-      {videos.map((video) => (
-        <Link to={"/watch?v=" + video.id} key={video.id}>
-          <VideoCard info={video} />
-        </Link>
-      ))}
+    <div id="video-container" className="max-w-[2000px] mx-auto px-4 sm:px-6 lg:px-8 my-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-4 gap-y-8">
+        {videos.map((video) => (
+          <Link to={"/watch?v=" + video.id} key={video.id} className="block">
+            <VideoCard info={video} />
+          </Link>
+        ))}
+      </div>
       {loading && (
-                <div className="flex justify-center items-center w-full">
-                    <ClipLoader color={"#123abc"} loading={loading} size={50} />
-                </div>
-            )}
+        <div className="flex justify-center items-center py-8">
+          <Loader2 className="w-8 h-8 animate-spin text-gray-500" />
+        </div>
+      )}
     </div>
   );
 };
 
-
-// const VideoContainer = () => {
-//   const [videos, setVideos] = useState([]);
-
-//   useEffect(() => {
-//       getVideos();
-//   }, []);
-
-//   const getVideos = async () => {
-//       try {
-//           const data = await fetch(YOUTUBE_VIDEO_API);
-//           const json = await data.json();
-//           setVideos(json.items);
-//       } catch (error) {
-//           console.error('Error fetching videos:', error);
-//       }
-//   };
-
-//   return (
-//       <div className='flex flex-wrap justify-center'>
-//           {videos.map((video) => (
-//               <Link to={"/watch?v=" + video.id} key={video.id}>
-//                   <VideoCard info={video} />
-//               </Link>
-//           ))}
-//       </div>
-//   );
-// };
-
-
-
-// const VideoContainer = () => {
-//   const [videos,setVideos] = useState([]);
-//   useEffect(()=>{
-//     getVideos();
-//   },[]);
-//   const getVideos = async ()=> {
-//     const data = await fetch(YOUTUBE_VIDEO_API);
-//     const json = await data.json();
-//     // console.log(json.items);
-//     setVideos(json.items)
-//   };
-//   // console.log(videos[0]);
-//   // console.log(typeof videos[0]);
-//   // const {snippet,statistics} = videos[0];
-//   // console.log(snippet);
-//   // console.log(statistics);
-//   return (
-//     <div className='flex flex-wrap justify-center'>
-//       {
-//         videos.map((video)=>(
-//           <Link to={"/watch?v="+video.id}>
-//           <VideoCard key={video.id} info={video}/>
-//           </Link>
-//         ))
-//       }
-      
-//     </div>
-//   )
-// }
-
 export default VideoContainer
+
