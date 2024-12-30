@@ -1,5 +1,4 @@
-import React from 'react'
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Shimmer } from 'react-shimmer';
 import { numberFormatter } from '../utils/helper';
 import { VerifiedIcon } from 'lucide-react';
@@ -11,7 +10,6 @@ const VideoCard = ({ info }) => {
     const timer = setTimeout(() => {
       setIsLoading(false);
     }, 1000);
-    console.log(info);
     return () => clearTimeout(timer);
   }, []);
 
@@ -21,7 +19,7 @@ const VideoCard = ({ info }) => {
   const getTimeDifference = (publishDate) => {
     const now = new Date();
     const published = new Date(publishDate);
-    const difference = now - published;
+    const difference = now.getTime() - published.getTime();
     const days = Math.floor(difference / (1000 * 60 * 60 * 24));
     if (days < 7) return `${days} day${days !== 1 ? 's' : ''} ago`;
     const weeks = Math.floor(days / 7);
@@ -35,36 +33,46 @@ const VideoCard = ({ info }) => {
   return (
     <div className='w-full bg-white dark:bg-gray-800 overflow-hidden group'>
       <div className='aspect-w-16 aspect-h-9 relative rounded-xl overflow-hidden mb-3'>
-        {isLoading && <Shimmer width="100%" height="100%" />}
-        <img
-          className={`${isLoading ? 'hidden' : 'object-cover w-full h-full transition-transform duration-200 group-hover:scale-105'}`}
-          alt='thumbnail'
-          src={thumbnails.high.url}
-        />
+        {isLoading ? (
+          <Shimmer width="100%" height="100%" />
+        ) : (
+          <img
+            className='object-cover w-full h-full transition-transform duration-200 group-hover:scale-105'
+            alt={title}
+            src={thumbnails.high.url}
+            loading="lazy"
+          />
+        )}
         <div className="absolute bottom-1 right-1 bg-black bg-opacity-80 text-white text-xs px-1 rounded">
-          {Math.floor(statistics.viewCount / 1000)}K views
+          {numberFormatter(statistics.viewCount)} views
         </div>
       </div>
       <div className='flex'>
         <div className="flex-shrink-0 mr-3">
-        <img
-         className="h-10 w-10 rounded-full"
-         src={thumbnails.default.url}
-         alt="Channel avatar"
-        />
-          {/* <div className="w-9 h-9 rounded-full bg-gray-200 dark:bg-gray-700"></div> */}
+          <img
+            className="h-8 w-8 rounded-full"
+            src={thumbnails.default.url}
+            alt={`${channelTitle} avatar`}
+            loading="lazy"
+          />
         </div>
         <div className='flex-grow'>
-          <h3 className='text-sm font-semibold line-clamp-2 mb-1 dark:text-white'>{isLoading ? 'Loading...' : title}</h3>
+          <h3 className='text-sm font-semibold line-clamp-2 mb-1 dark:text-white'>
+            {isLoading ? 'Loading...' : title}
+          </h3>
           <p className='text-xs text-gray-500 dark:text-gray-400 flex items-center'>
-            {isLoading ? 'Loading...' : channelTitle}
-            <VerifiedIcon className="w-3 h-3 ml-1 text-gray-400" />
+            {isLoading ? 'Loading...' : (
+              <>
+                {channelTitle}
+                <VerifiedIcon className="w-3 h-3 ml-1 text-gray-400" aria-label="Verified channel" />
+              </>
+            )}
           </p>
           <p className='flex gap-1 text-xs text-gray-500 dark:text-gray-400'>
             {isLoading ? 'Loading...' : (
               <>
                 <span>{numberFormatter(statistics.viewCount)} views</span>
-                <span>•</span>
+                <span aria-hidden="true">•</span>
                 <span>{getTimeDifference(publishedAt)}</span>
               </>
             )}
@@ -75,5 +83,5 @@ const VideoCard = ({ info }) => {
   );
 };
 
-export default VideoCard
+export default VideoCard;
 

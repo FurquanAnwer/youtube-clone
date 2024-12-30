@@ -1,19 +1,15 @@
-import React, { useEffect, useState } from 'react'
-import { YOUTUBE_VIDEO_API } from '../utils/constants';
-import VideoCard from './VideoCard';
+import React, { useEffect, useState, useCallback } from 'react';
 import { Link } from 'react-router-dom';
+import VideoCard from './VideoCard';
 import { Loader2 } from 'lucide-react';
+import { YOUTUBE_VIDEO_API } from '../utils/constants';
 
 const VideoContainer = () => {
   const [videos, setVideos] = useState([]);
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
 
-  useEffect(() => {
-    getVideos();
-  }, []);
-
-  const getVideos = async () => {
+  const getVideos = useCallback(async () => {
     if (loading) return;
     setLoading(true);
     try {
@@ -26,27 +22,31 @@ const VideoContainer = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [loading]);
 
-  const handleScroll = () => {
+  useEffect(() => {
+    getVideos();
+  }, [getVideos]);
+
+  const handleScroll = useCallback(() => {
     if (loading || !hasMore) return;
     const scrollPosition = window.scrollY + window.innerHeight;
-    const containerHeight = document.getElementById('video-container').offsetHeight;
+    const containerHeight = document.getElementById('video-container')?.offsetHeight || 0;
     if (scrollPosition >= containerHeight - 500) {
       getVideos();
     }
-  };
+  }, [loading, hasMore, getVideos]);
 
   useEffect(() => {
     window.addEventListener('scroll', handleScroll);
     return () => {
       window.removeEventListener('scroll', handleScroll);
     };
-  }, [loading, hasMore]);
+  }, [handleScroll]);
 
   return (
-    <div id="video-container" className="max-w-[2000px] mx-auto px-4 sm:px-6 lg:px-8 my-4">
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-4 gap-y-8">
+    <div id="video-container" className="w-full mx-auto my-2 sm:my-4">
+      <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
         {videos.map((video) => (
           <Link to={"/watch?v=" + video.id} key={video.id} className="block">
             <VideoCard info={video} />
@@ -54,13 +54,13 @@ const VideoContainer = () => {
         ))}
       </div>
       {loading && (
-        <div className="flex justify-center items-center py-8">
-          <Loader2 className="w-8 h-8 animate-spin text-gray-500" />
+        <div className="flex justify-center items-center py-4 sm:py-6">
+          <Loader2 className="w-6 h-6 sm:w-8 sm:h-8 animate-spin text-gray-500" />
         </div>
       )}
     </div>
   );
 };
 
-export default VideoContainer
+export default VideoContainer;
 

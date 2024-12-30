@@ -1,16 +1,17 @@
 import React from 'react'
 import SideBar from './SideBar'
-import MainContainer from './MainContainer'
-import Watchpage from './Watchpage'
 import { Outlet } from 'react-router-dom'
 
 const Body = () => {
   return (
-    <div className='grid grid-flow-col gap-0'>
-        <SideBar/>
-        <Outlet/>
+    <div className='w-full flex-1 flex'>
+      <SideBar />
+      <div className='flex-1 overflow-x-hidden'>
+        <Outlet />
+      </div>
     </div>
   )
 }
 
 export default Body
+
