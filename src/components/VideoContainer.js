@@ -11,6 +11,8 @@ const VideoContainer = () => {
 
   const getVideos = useCallback(async () => {
     if (loading) return;
+    console.log("YouTube API Key:", process.env.REACT_APP_YOUTUBE_API_KEY);
+
     setLoading(true);
     try {
       const data = await fetch(YOUTUBE_VIDEO_API);
