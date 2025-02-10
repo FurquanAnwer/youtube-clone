@@ -1,6 +1,7 @@
 import React from 'react'
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
+import { API_KEY } from '../utils/constants';
 
 const info = {
     name : "furquan",
@@ -11,7 +12,7 @@ const info = {
 
 // Function to fetch comments for a video
 async function fetchComments(videoId) {
-    const response = await fetch(`https://www.googleapis.com/youtube/v3/commentThreads?part=snippet&videoId=${videoId}&key=AIzaSyBm1dmqgLQyiooa6khtY6kVNZlye8nw2LM`);
+    const response = await fetch(`https://www.googleapis.com/youtube/v3/commentThreads?part=snippet&videoId=${videoId}&key=${API_KEY}`);
     const data = await response.json();
     return data.items;
 }
@@ -49,56 +50,6 @@ function CommentsSection({ videoId }) {
   }
 
 
-//   function AddCommentForm({ videoId }) {
-//     const [newComment, setNewComment] = useState('');
-
-//     const handleSubmit = async (e) => {
-//         e.preventDefault();
-//         try {
-//             const response = await fetch(
-//                 `https://www.googleapis.com/youtube/v3/commentThreads?part=snippet&key=AIzaSyBm1dmqgLQyiooa6khtY6kVNZlye8nw2LM`,
-//                 {
-//                     method: 'POST',
-//                     headers: {
-//                         'Content-Type': 'application/json',
-//                     },
-//                     body: JSON.stringify({
-//                         snippet: {
-//                             videoId,
-//                             topLevelComment: {
-//                                 snippet: {
-//                                     textOriginal: newComment,
-//                                 },
-//                             },
-//                         },
-//                     }),
-//                 }
-//             );
-//             const data = await response.json();
-//             console.log('Comment added:', data);
-//             setNewComment('');
-//         } catch (error) {
-//             console.error('Error adding comment:', error);
-//         }
-//     };
-
-//     return (
-//         <div className="w-full">
-//             <form onSubmit={handleSubmit} className="w-full">
-//                 <textarea
-//                     className="w-full p-2 mb-2 border border-gray-300 rounded"
-//                     value={newComment}
-//                     onChange={(e) => setNewComment(e.target.value)}
-//                     placeholder="Add a comment..."
-//                     rows="4"
-//                 />
-//                 <button type="submit" className="px-4 py-2 text-white bg-blue-500 rounded">
-//                     Comment
-//                 </button>
-//             </form>
-//         </div>
-//     );
-// }
   
 function AddCommentForm({ videoId }) {
   const [newComment, setNewComment] = useState('');
@@ -108,7 +59,7 @@ function AddCommentForm({ videoId }) {
       e.preventDefault();
       try {
           const response = await fetch(
-              `https://www.googleapis.com/youtube/v3/commentThreads?part=snippet&key=AIzaSyBm1dmqgLQyiooa6khtY6kVNZlye8nw2LM`,
+              `https://www.googleapis.com/youtube/v3/commentThreads?part=snippet&key=${API_KEY}`,
               {
                   method: 'POST',
                   headers: {
@@ -178,27 +129,6 @@ function AddCommentForm({ videoId }) {
       </div>
   );
 }
-  
-// const Comment = ({data})=>{
-//     const {name,text,replies} = data;
-//     return(
-//         <div className='flex'>
-//             <img
-//             className='w-12 h-12'
-//             src=""
-//             alt="">
-//             </img>
-//             <div className='px-3'>
-//                 <p className='font-bold'>{name}</p>
-//                 <p>{text}</p>
-//             </div>
-//         </div>
-//     );
-// };
-
-// const CommentsList = ({comments}) =>{
-//     return comments.map((comment)=><Comment data={comment}/>);
-// }
 
 const CommentsContainer = () => {
     const [searchParams] = useSearchParams();
@@ -207,9 +137,7 @@ const CommentsContainer = () => {
   return (
     <div className='m-5 p-2 shadow-lg bg-gray-100 rounded-lg'>
         <h1 className='text-2xl font-bold'>Comments:</h1>
-        {/* <CommentsList comments= {info}/> */}
         <AddCommentForm videoId={videoId}/>
-        {/* <Comment data = {info}/> */}
         <CommentsSection videoId={videoId}/>
     </div>
   )
