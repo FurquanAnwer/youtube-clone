@@ -6,15 +6,14 @@ import { VerifiedIcon } from 'lucide-react';
 const VideoCard = ({ info }) => {
   const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 1000);
-    return () => clearTimeout(timer);
-  }, []);
-
   const { snippet, statistics } = info;
   const { channelTitle, title, thumbnails, publishedAt } = snippet;
+
+  useEffect(() => {
+    const img = new Image();
+    img.src = thumbnails.high.url;
+    img.onload = () => setIsLoading(false);
+  }, [thumbnails.high.url]);
 
   const getTimeDifference = (publishDate) => {
     const now = new Date();
@@ -33,20 +32,23 @@ const VideoCard = ({ info }) => {
   return (
     <div className='w-full bg-white dark:bg-gray-800 overflow-hidden group'>
       <div className='aspect-w-16 aspect-h-9 relative rounded-xl overflow-hidden mb-3'>
-        {isLoading ? (
-          <Shimmer width="100%" height="100%" />
-        ) : (
-          <img
-            className='object-cover w-full h-full transition-transform duration-200 group-hover:scale-105'
-            alt={title}
-            src={thumbnails.high.url}
-            loading="lazy"
-          />
+        
+        {isLoading && (
+          <div className="w-full h-full">
+            <Shimmer width="100%" height="100%" />
+          </div>
         )}
-        <div className="absolute bottom-1 right-1 bg-black bg-opacity-80 text-white text-xs px-1 rounded">
-          {numberFormatter(statistics.viewCount)} views
-        </div>
+
+        <img
+          className={`object-cover w-full h-full transition-opacity duration-300 ${
+            isLoading ? 'opacity-0' : 'opacity-100'
+          }`}
+          alt={title}
+          src={thumbnails.high.url}
+          loading="lazy"
+        />
       </div>
+
       <div className='flex'>
         <div className="flex-shrink-0 mr-3">
           <img
@@ -56,23 +58,26 @@ const VideoCard = ({ info }) => {
             loading="lazy"
           />
         </div>
+
         <div className='flex-grow'>
           <h3 className='text-sm font-semibold line-clamp-2 mb-1 dark:text-white'>
             {isLoading ? 'Loading...' : title}
           </h3>
+
           <p className='text-xs text-gray-500 dark:text-gray-400 flex items-center'>
             {isLoading ? 'Loading...' : (
               <>
                 {channelTitle}
-                <VerifiedIcon className="w-3 h-3 ml-1 text-gray-400" aria-label="Verified channel" />
+                <VerifiedIcon className="w-3 h-3 ml-1 text-gray-400" />
               </>
             )}
           </p>
+
           <p className='flex gap-1 text-xs text-gray-500 dark:text-gray-400'>
             {isLoading ? 'Loading...' : (
               <>
                 <span>{numberFormatter(statistics.viewCount)} views</span>
-                <span aria-hidden="true">•</span>
+                <span>•</span>
                 <span>{getTimeDifference(publishedAt)}</span>
               </>
             )}
@@ -84,4 +89,3 @@ const VideoCard = ({ info }) => {
 };
 
 export default VideoCard;
-
